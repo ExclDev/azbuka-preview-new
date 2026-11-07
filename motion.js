@@ -81,7 +81,7 @@
      --------------------------------------------------------- */
   var hero = $('.hero');
   var heroBg = $('.hero-bg-img');
-  var heroTitle = $('[data-city-hero-title]');
+  var heroTitle = $('[data-hero-title]');
   var heroEyebrow = $('.hero-eyebrow');
   var revealed = false;
   var queued = null;
@@ -99,9 +99,8 @@
     var args = queued;
     if (!args) {
       try {
-        var key = (window.AZ_CITY && window.AZ_CITY.key) || 'tomsk';
-        /* global CITIES */
-        args = ['Профессиональный', CITIES[key].heroLine2];
+        /* Заголовок первого экрана своего города: AZ_CITY выводится при сборке */
+        args = ['Профессиональный', window.AZ_CITY.heroLine2];
       } catch (e) { args = null; }
     }
     if (args) origType(args[0], args[1]);

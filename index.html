@@ -3,20 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <script>
-/* Превью для показа: заявки никуда не отправляются, город по IP не определяется. */
+/* Превью для показа: заявки никуда не отправляются. */
 (function () {
   var realFetch = window.fetch.bind(window);
-  function json(body) {
-    return new Promise(function (ok) {
-      setTimeout(function () {
-        ok(new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } }));
-      }, 400);
-    });
-  }
   window.fetch = function (url, opts) {
-    var u = String(url && url.url || url);
-    if (u.indexOf('api/lead.php') !== -1) return json({ ok: true });
-    if (u.indexOf('ipapi.co') !== -1) return json({});
+    if (String(url && url.url || url).indexOf('api/lead.php') !== -1) {
+      return new Promise(function (ok) {
+        setTimeout(function () {
+          ok(new Response('{"ok":true}', { status: 200, headers: { 'Content-Type': 'application/json' } }));
+        }, 400);
+      });
+    }
     return realFetch(url, opts);
   };
 })();
@@ -25,26 +22,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Ремонт квартир в Томске под ключ | Азбука Ремонта</title>
 <meta name="description" content="Профессиональный ремонт квартир и домов в Томске. Бесплатная смета за 24 часа. Гарантия 24 месяца. Более 600 объектов. Работаем по договору с 2010 года." />
-<meta name="keywords" content="ремонт квартир Томск, ремонт под ключ Томск, отделка квартир, дизайн проект, капитальный ремонт Томск, Азбука ремонта" />
+<meta name="keywords" content="ремонт квартир Томск, ремонт под ключ Томск, отделка квартир Томск, дизайн проект Томск, капитальный ремонт Томск, Азбука ремонта" />
 <meta name="robots" content="noindex, nofollow">
 <link rel="canonical" href="https://azbuka-remonta.ru/" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23E8201A'/%3E%3Ctext x='16' y='23' font-size='20' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3EА%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="images/logo.webp" />
-<script>
-(function () {
-  var HERO = { tomsk: 'images/hero-bg-tmsk.webp', novosibirsk: 'images/hero-bg-nsk.webp' };
-  var HERO_MOBILE = { tomsk: 'images/hero-bg-tmsk-mobile.webp', novosibirsk: 'images/hero-bg-nsk-mobile.webp' };
-  var DEFAULT_CITY = 'tomsk'; // ВНИМАНИЕ: должно совпадать с DEFAULT_CITY в основном <script> (~строка 4482)
-  var saved = localStorage.getItem('azbuka_city');
-  var cityForPreload = (saved && HERO[saved]) ? saved : DEFAULT_CITY;
-  var isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-  var link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
-  link.href = isMobile ? HERO_MOBILE[cityForPreload] : HERO[cityForPreload];
-  document.head.appendChild(link);
-})();
-</script>
+<link rel="preload" as="image" href="images/hero-bg-tmsk.webp" media="(min-width: 769px)" />
+<link rel="preload" as="image" href="images/hero-bg-tmsk-mobile.webp" media="(max-width: 768px)" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://azbuka-remonta.ru/" />
 <meta property="og:title" content="Азбука Ремонта — Профессиональный ремонт квартир в Томске" />
@@ -1191,6 +1175,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   color: #666; font-family: var(--font-body);
   transition: color .2s, background .2s;
   border-radius: var(--radius-pill);
+  line-height: normal; /* вкладки стали ссылками: у <a> строка наследуется от страницы, у <button> была normal */
 }
 .city-tab:hover { color: #ccc; }
 .city-tab.active { background: var(--red); color: #fff; }
@@ -1490,7 +1475,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
 </script>
 <!-- /Яндекс.Метрика -->
 </head>
-<body>
+<body class="city-bar-visible">
 
 
 
@@ -1500,16 +1485,12 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#E8201A" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
       Ваш город:
     </span>
-    <div class="city-tabs" role="tablist">
-      <button class="city-tab active" id="tab-tomsk" role="tab" aria-selected="true"
-              onclick="switchCity('tomsk')">Томск</button>
-      <button class="city-tab" id="tab-novosibirsk" role="tab" aria-selected="false"
-              onclick="switchCity('novosibirsk')">Новосибирск</button>
+    <div class="city-tabs">
+      <a class="city-tab active" href="./" aria-current="page">Томск</a>
+      <a class="city-tab" href="nsk/">Новосибирск</a>
     </div>
-    <span class="city-bar-auto" id="cityBarAuto"></span>
   </div>
 </div>
-<div class="city-toast" id="cityToast"></div>
 <header class="header" role="banner">
   <div class="wrapper">
     <div class="header-inner">
@@ -1539,7 +1520,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
           </a>
         </div>
         <div class="header-phone">
-          <a href="tel:+73822979949" data-city-phone data-tomsk-href="tel:+73822979949" data-novosibirsk-href="tel:+79231410154">8 (3822) 97-99-49</a>
+          <a href="tel:+73822979949">8 (3822) 97-99-49</a>
         </div>
         <button class="btn btn-red btn-cta" onclick="openPopup('Шапка — Оставить заявку')">Оставить заявку</button>
         <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false">
@@ -1557,15 +1538,15 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
   <a href="#remote" onclick="closeMobileMenu()">Берём на себя</a>
   <a href="#reviews" onclick="closeMobileMenu()">Отзывы</a>
   <a href="#contacts" onclick="closeMobileMenu()">Контакты</a>
-  <div class="header-phone"><a href="tel:+73822979949" data-city-phone data-tomsk-href="tel:+73822979949" data-novosibirsk-href="tel:+79231410154">8 (3822) 97-99-49</a></div>
+  <div class="header-phone"><a href="tel:+73822979949">8 (3822) 97-99-49</a></div>
   <button class="btn btn-red btn-cta" onclick="openPopup('Мобильное меню — Оставить заявку'); closeMobileMenu()">Оставить заявку</button>
 </nav>
 <section class="hero" aria-label="Главный экран">
   <div class="hero-bg-img" role="img" aria-label="Красивый интерьер отремонтированной квартиры"></div>
   <div class="hero-bg"></div>
   <div class="wrapper hero-content">
-    <p class="hero-eyebrow" data-city-eyebrow>Томск — Новосибирск</p>
-    <h1 class="hero-title" data-city-hero-title>
+    <p class="hero-eyebrow">Томск</p>
+    <h1 class="hero-title" data-hero-title>
       <em>Профессиональный</em>
       ремонт в Томске
     </h1>
@@ -1665,7 +1646,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
               <h3 class="reason-name reason-back-name">Смета не плывёт</h3>
               <div class="reason-copy">
                 <p class="reason-text">Цену фиксируем в договоре. Всё, что не учли в смете, согласуем с вами заранее.</p>
-                <blockquote class="reason-proof"><span data-city-proof="0">«всё отлично, в срок, всё прозрачно и понятно»</span><cite class="reason-cite"><span data-city-proof-author="0">Евгения Сурова</span>, 2ГИС</cite></blockquote>
+                <blockquote class="reason-proof"><span>«всё отлично, в срок, всё прозрачно и понятно»</span><cite class="reason-cite"><span>Евгения Сурова</span>, 2ГИС</cite></blockquote>
               </div>
             </div>
           </div>
@@ -1684,7 +1665,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
               <h3 class="reason-name reason-back-name">Сдаём в срок</h3>
               <div class="reason-copy">
                 <p class="reason-text">Сроки прописываем в договоре, а ход работ показываем онлайн.</p>
-                <blockquote class="reason-proof"><span data-city-proof="1">«Квартиру сдали в срок, даже на пару недель раньше»</span><cite class="reason-cite"><span data-city-proof-author="1">Валя Рогова</span>, 2ГИС</cite></blockquote>
+                <blockquote class="reason-proof"><span>«Квартиру сдали в срок, даже на пару недель раньше»</span><cite class="reason-cite"><span>Валя Рогова</span>, 2ГИС</cite></blockquote>
               </div>
             </div>
           </div>
@@ -1703,7 +1684,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
               <h3 class="reason-name reason-back-name">600 объектов с 2010 года</h3>
               <div class="reason-copy">
                 <p class="reason-text">Каждый объект — с фотоотчётом и актом приёмки.</p>
-                <blockquote class="reason-proof"><span data-city-proof="2">«за постоянные фото и видео с ремонта»</span><cite class="reason-cite"><span data-city-proof-author="2">Сергей Б.</span>, 2ГИС</cite></blockquote>
+                <blockquote class="reason-proof"><span>«за постоянные фото и видео с ремонта»</span><cite class="reason-cite"><span>Сергей Б.</span>, 2ГИС</cite></blockquote>
               </div>
             </div>
           </div>
@@ -1722,7 +1703,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
               <h3 class="reason-name reason-back-name">От проекта до мебели</h3>
               <div class="reason-copy">
                 <p class="reason-text">Ведём объект под ключ: от дизайн-проекта до чистовой отделки и установки мебели.</p>
-                <blockquote class="reason-proof"><span data-city-proof="3">«на каждом этапе на связи менеджер и прораб»</span><cite class="reason-cite"><span data-city-proof-author="3">Anton Umarov</span>, 2ГИС</cite></blockquote>
+                <blockquote class="reason-proof"><span>«на каждом этапе на связи менеджер и прораб»</span><cite class="reason-cite"><span>Anton Umarov</span>, 2ГИС</cite></blockquote>
               </div>
             </div>
           </div>
@@ -2096,7 +2077,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
     <div class="sale-inner">
       <div>
         <div class="sale-badge">Акция</div>
-        <h2 class="sale-title" id="sale-title">Скидка 50% на<br />дизайн‑проект</h2>
+        <h2 class="sale-title" id="sale-title">Скидка 50% на дизайн‑проект</h2>
         <p class="sale-text">Мы не работаем без дизайн-проекта. Такой проект создаётся под особенности каждого помещения, с целью отразить пожелания заказчика и рассчитать количество и стоимость необходимых работ.</p>
       </div>
       <div class="sale-right">
@@ -2158,8 +2139,8 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
 <section class="contacts" id="contacts" aria-labelledby="contacts-title">
   <div class="contacts-inner">
     <div class="contacts-map" id="contactsMap"
-         data-map-src="https://yandex.ru/map-widget/v1/?ll=84.956326%2C56.458676&z=17&pt=84.956326%2C56.458676%2Cpm2rdm&l=map"
-         data-map-alt="Офис Азбуки Ремонта — Томск, Кулёва 24"
+         data-map-src="https://yandex.ru/map-widget/v1/?ll=84.956326%2C56.458676&amp;z=17&amp;pt=84.956326%2C56.458676%2Cpm2rdm&amp;l=map"
+         data-map-alt="Карта — офис Азбуки Ремонта в Томске"
          data-city-key="tomsk">
       <canvas id="officeGlobe" class="office-globe" aria-hidden="true"></canvas>
       <button type="button"
@@ -2174,7 +2155,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
         </span>
         <span class="map-reveal-text">
           Нажмите, чтобы открыть карту
-          <small id="mapRevealCity" data-city-map-caption>Офис — Томск</small>
+          <small id="mapRevealCity">Офис — Томск</small>
         </span>
       </button>
     </div>
@@ -2191,7 +2172,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
           </div>
           <div>
             <p class="contacts-item-label">Адрес офиса</p>
-            <p class="contacts-item-value" data-city-address>Томск, Кулёва 24, 4 этаж, офис 402</p>
+            <p class="contacts-item-value">Томск, Кулёва 24, 4 этаж, офис 402</p>
           </div>
         </div>
         <div class="contacts-item">
@@ -2214,7 +2195,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
           </div>
           <div>
             <p class="contacts-item-label">Телефон</p>
-            <p class="contacts-item-value"><a href="tel:+73822979949" data-city-phone data-tomsk-href="tel:+73822979949" data-novosibirsk-href="tel:+79231410154">8 (3822) 97-99-49</a></p>
+            <p class="contacts-item-value"><a href="tel:+73822979949">8 (3822) 97-99-49</a></p>
           </div>
         </div>
         <div class="contacts-item">
@@ -2226,7 +2207,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
           </div>
           <div>
             <p class="contacts-item-label">E-mail</p>
-            <p class="contacts-item-value"><a href="mailto:sales@azbuka-remonta.tomsk.ru" data-city-email>sales@azbuka-remonta.tomsk.ru</a></p>
+            <p class="contacts-item-value"><a href="mailto:sales@azbuka-remonta.tomsk.ru">sales@azbuka-remonta.tomsk.ru</a></p>
           </div>
         </div>
       </address>
@@ -2251,7 +2232,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
         <a href="policy.html">Пользовательское соглашение</a>
       </nav>
       <div class="footer-contact">
-        <div class="footer-phone"><a href="tel:+73822979949" data-city-phone data-tomsk-href="tel:+73822979949" data-novosibirsk-href="tel:+79231410154">8 (3822) 97-99-49</a></div>
+        <div class="footer-phone"><a href="tel:+73822979949">8 (3822) 97-99-49</a></div>
         <div class="footer-actions">
           <div class="footer-socials">
             <a href="https://vk.com/azbukaremonta" target="_blank" rel="noopener noreferrer" aria-label="ВКонтакте">
@@ -2272,7 +2253,7 @@ body.city-bar-visible .mobile-menu { transform: translateY(36px); }
     <div class="ed-wordmark" aria-hidden="true"><span>Азбука</span> <span>Ремонта</span></div>
     <div class="footer-bottom">
       <span>© 2026. ООО «АЗБУКА РЕМОНТА». Все права защищены</span>
-      <span data-city-footer-text>Ремонт квартир в Томске с 2010 года</span>
+      <span>Ремонт квартир в Томске с 2010 года</span>
       <a class="footer-dev-credit" href="https://exclusivedev.ru/landing/" target="_blank" rel="noopener noreferrer" aria-label="Разработка лендинга — exc/dev">
         <span class="footer-dev-credit-text">Разработка лендинга</span>
         <img src="images/exclusivedev-logo.svg" alt="exc/dev" width="90" height="15" loading="lazy" />
@@ -2709,10 +2690,8 @@ window.AZ_LEAD = (function () {
   }
   function showError(formEl, text) {
     const box = errorBox(formEl);
-    const phone = (window.CITIES && window.AZ_CITY && window.CITIES[window.AZ_CITY.key])
-      ? window.CITIES[window.AZ_CITY.key].phone : '';
-    const href = (window.CITIES && window.AZ_CITY && window.CITIES[window.AZ_CITY.key])
-      ? window.CITIES[window.AZ_CITY.key].phoneHref : '';
+    const phone = (window.AZ_CITY && window.AZ_CITY.phone) || '';
+    const href  = (window.AZ_CITY && window.AZ_CITY.phoneHref) || '';
     if (!box) { alert(text); return; }
     box.innerHTML = text + (phone ? ' Позвоните нам: <a href="' + href + '">' + phone + '</a>' : '');
     box.hidden = false;
@@ -2725,26 +2704,28 @@ window.AZ_LEAD = (function () {
     setTimeout(() => { el.style.borderColor = ''; }, 2000);
   }
 
-  /* Город берём из состояния, применённого к странице: в localStorage
-     может не быть ничего, если определение по IP не сработало. */
+  /* Город задаёт сайт, на котором оставили заявку: у каждого города свой
+     сайт. Источник всегда «site». */
   function cityPayload() {
     const c = window.AZ_CITY || {};
-    let city = c.name || 'Не определён';
-    // Посетитель из Кемерова видит томскую версию сайта — это осознанный
-    // дефолт, и он остаётся. Но в CRM такая заявка не томская: менеджеру
-    // важно понять, что регион чужой. Город, выбранный вручную, доверия
-    // заслуживает больше ответа геосервиса, поэтому его не перебиваем.
-    if (c.source !== 'Выбрал вручную' && c.ipCity && c.ipMatched === false) {
-      city = 'Другой регион';
-    }
     return {
-      city: city,
-      city_ip: c.ipCity || '',
-      city_source: c.source || 'Не определился'
+      city: c.name || 'Не определён',
+      city_source: 'site'
     };
   }
 
-  async function send(formEl, payload, onSuccess) {
+  /* Цель Метрики на успешную отправку. Счётчик есть не на каждом сайте:
+     на сайте без счётчика YM_COUNTER_ID не объявлен и вызова не будет. */
+  function reachGoal(goal) {
+    if (!goal) return;
+    try {
+      if (typeof ym === 'function' && typeof YM_COUNTER_ID !== 'undefined' && YM_COUNTER_ID) {
+        ym(YM_COUNTER_ID, 'reachGoal', goal);
+      }
+    } catch (e) { /* метрика не должна ломать отправку */ }
+  }
+
+  async function send(formEl, payload, onSuccess, goal) {
     const btn = formEl.querySelector('[type="submit"]');
     const btnText = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
@@ -2770,6 +2751,7 @@ window.AZ_LEAD = (function () {
       clearTimeout(timer);
       const data = await r.json().catch(() => ({}));
       if (r.ok && data && data.ok) {
+        reachGoal(goal);
         onSuccess();
         formEl.reset();
         return;
@@ -2810,7 +2792,7 @@ function handleFormSubmit(e, formEl) {
     if (!overlay.classList.contains('open')) openPopup(AZ_LEAD.trigger);
     document.getElementById('popupFormBox').style.display = 'none';
     document.getElementById('popupSuccess').style.display = '';
-  });
+  }, formEl.id === 'mainForm' ? 'lead_form' : 'lead_popup');
 }
 document.getElementById('mainForm').addEventListener('submit', e => handleFormSubmit(e, e.target));
 document.getElementById('popupFormInner').addEventListener('submit', e => handleFormSubmit(e, e.target));
@@ -3066,7 +3048,7 @@ function toggleTech(btn) {
   /* Точки суши — Fibonacci-sphere lattice, только по земле. [lat0, lon0, lat1, lon1, ...] */
   var LAND_DOTS_FLAT = [81.4,-44.86,80.27,-77.32,79.66,-24.8,78.7,-57.26,77.32,-37.2,76.53,-69.66,76.38,67.85,75.78,-102.12,75.35,-49.6,74.66,-82.06,74.26,-29.53,74.13,107.97,73.11,128.04,72.99,-94.46,72.62,-41.93,72.5,95.57,72.15,148.1,71.57,115.64,71.46,-106.86,71.02,83.18,70.69,135.7,70.58,-86.79,70.26,-34.27,70.15,103.24,69.84,155.76,69.63,70.78,69.53,-151.72,69.33,123.3,69.22,-99.19,69.02,175.82,68.92,-46.67,68.82,90.84,68.73,-131.65,68.53,143.36,68.33,58.38,68.24,-164.11,68.04,110.9,67.85,25.92,67.76,163.42,67.57,78.44,67.48,-144.05,67.29,130.96,67.2,-91.53,67.01,-176.51,66.92,-39.01,66.83,98.5,66.74,-123.99,66.65,13.52,66.56,151.02,66.47,-71.47,66.38,66.04,66.29,-156.45,66.2,-18.94,66.11,118.56,66.03,-103.93,65.94,33.58,65.85,171.09,65.76,-51.41,65.67,86.1,65.59,-136.39,65.42,138.63,65.24,53.64,64.99,106.16,64.9,-116.33,64.82,21.18,64.74,158.69,64.57,73.7,64.48,-148.79,64.32,126.23,64.24,-96.27,64.15,41.24,63.99,-43.74,63.91,93.77,63.83,-128.73,63.67,146.29,63.5,61.3,63.42,-161.19,63.26,113.83,63.18,-108.66,63.11,28.84,63.03,166.35,62.87,81.37,62.79,-141.13,62.63,133.89,62.48,48.91,62.25,101.43,62.17,-121.06,62.09,16.44,62.02,153.95,61.86,68.97,61.79,-153.52,61.64,121.49,61.56,-101.0,61.49,36.51,61.34,-48.48,61.26,89.03,61.19,-133.46,61.04,141.55,60.89,56.57,60.67,109.09,60.6,-113.4,60.53,24.11,60.31,76.63,60.09,129.15,59.95,44.17,59.74,96.69,59.66,-125.8,59.59,11.71,59.52,149.22,59.45,-73.28,59.38,64.23,59.31,-158.26,59.17,116.75,59.1,-105.74,59.03,31.77,58.82,84.29,58.75,-138.2,58.62,136.82,58.48,51.83,58.27,104.36,58.21,-118.14,58.0,-65.61,57.94,71.89,57.73,124.42,57.67,-98.07,57.6,39.43,57.4,91.96,57.33,-130.54,57.07,59.5,56.87,112.02,56.81,-110.47,56.74,27.03,56.55,79.56,56.42,-5.43,56.35,132.08,56.29,-90.41,56.22,47.1,56.03,99.62,55.97,-122.87,55.77,-70.35,55.71,67.16,55.52,119.68,55.46,-102.81,55.39,34.7,55.2,87.22,54.95,-82.75,54.89,54.76,54.71,107.28,54.64,-115.21,54.58,22.3,54.52,159.81,54.46,-62.69,54.4,74.82,54.21,127.34,54.15,-95.15,54.09,42.36,53.91,94.88,53.85,-127.61,53.79,9.9,53.66,-75.09,53.6,62.42,53.42,114.95,53.36,-107.55,53.3,29.96,53.12,82.48,53.0,-2.5,52.95,135.01,52.89,-87.48,52.83,50.02,52.65,102.55,52.59,-119.95,52.53,17.56,52.41,-67.42,52.35,70.09,52.18,122.61,52.12,-99.88,52.06,37.62,51.89,90.15,51.77,5.16,51.71,142.67,51.6,57.69,51.43,110.21,51.37,-112.28,51.31,25.23,51.2,-59.76,51.14,77.75,50.97,130.27,50.91,-92.22,50.86,45.29,50.69,97.81,50.63,-124.68,50.57,12.83,50.46,-72.16,50.4,65.35,50.24,117.87,50.18,-104.62,50.12,32.89,49.96,85.41,49.79,137.93,49.73,-84.56,49.68,52.95,49.51,105.47,49.46,-117.02,49.4,20.49,49.24,73.01,49.07,125.54,49.02,-96.96,48.96,40.55,48.8,93.07,48.69,8.09,48.58,-76.89,48.53,60.61,48.37,113.14,48.31,-109.36,48.26,28.15,48.15,-56.83,48.1,80.68,47.99,-4.31,47.94,133.2,47.88,-89.29,47.83,48.21,47.67,100.74,47.62,-121.75,47.56,15.75,47.46,-69.23,47.41,68.28,47.25,120.8,47.19,-101.69,47.14,35.82,46.98,88.34,46.88,3.35,46.77,-81.63,46.72,55.88,46.57,108.4,46.51,-114.09,46.46,23.42,46.31,75.94,46.15,128.46,46.1,-94.03,46.05,43.48,45.89,96.0,45.79,11.02,45.69,-73.97,45.64,63.54,45.48,116.06,45.43,-106.43,45.23,83.6,45.08,136.13,45.02,-86.37,44.82,103.66,44.77,-118.83,44.72,18.68,44.57,71.2,44.42,123.73,44.37,-98.77,44.32,38.74,44.17,91.27,44.07,6.28,44.02,143.79,43.97,-78.7,43.92,58.8,43.77,111.33,43.72,-111.16,43.67,26.34,43.52,78.87,43.42,-6.12,43.38,131.39,43.33,-91.1,43.28,46.41,43.13,98.93,43.08,-123.56,42.93,-71.04,42.88,66.47,42.74,118.99,42.69,-103.5,42.49,86.53,42.4,1.55,42.3,-83.44,42.25,54.07,42.11,106.59,42.06,-115.9,42.01,21.61,41.87,74.13,41.72,126.65,41.67,-95.84,41.63,41.67,41.48,94.19,41.29,-75.78,41.24,61.73,41.1,114.25,41.05,-108.24,41.01,29.27,40.86,81.79,40.77,-3.19,40.67,-88.18,40.63,49.33,40.49,101.86,40.44,-120.64,40.25,69.39,40.11,121.92,40.06,-100.57,40.02,36.93,39.88,89.46,39.69,-80.51,39.64,57.0,39.5,109.52,39.46,-112.97,39.27,77.06,39.18,-7.93,39.09,-92.91,39.04,44.6,38.9,97.12,38.67,64.66,38.54,117.18,38.49,-105.31,38.44,32.2,38.31,84.72,38.13,-85.25,37.94,104.78,37.9,-117.71,37.72,72.32,37.54,-97.65,37.49,39.86,37.36,92.38,37.17,-77.59,37.13,59.92,37.0,112.45,36.95,-110.05,36.77,79.98,36.68,-5.0,36.59,-89.98,36.55,47.52,36.41,100.05,36.19,67.59,36.06,120.11,36.01,-102.38,35.84,87.65,35.75,2.66,35.71,140.17,35.66,-82.32,35.62,55.19,35.49,107.71,35.44,-114.78,35.27,75.25,35.13,127.77,35.09,-94.72,35.05,42.79,34.92,95.31,34.83,10.33,34.7,62.85,34.57,115.37,34.52,-107.12,34.35,82.91,34.26,-2.07,34.22,135.43,34.18,-87.06,34.13,50.45,34.0,102.97,33.79,70.51,33.62,-99.46,33.57,38.05,33.44,90.57,33.36,5.59,33.27,-79.39,33.23,58.11,33.1,110.64,33.06,-111.86,32.89,78.18,32.8,-6.81,32.76,130.7,32.72,-91.79,32.67,45.71,32.55,98.24,32.46,13.25,32.33,65.78,32.21,118.3,32.16,-104.19,32.0,85.84,31.91,0.85,31.83,-84.13,31.78,53.38,31.66,105.9,31.62,-116.59,31.57,20.92,31.45,73.44,31.28,-96.53,31.24,40.98,31.11,93.5,31.03,8.52,30.9,61.04,30.78,113.56,30.74,-108.93,30.7,28.58,30.57,81.1,30.49,-3.88,30.4,-88.87,30.36,48.64,30.24,101.16,30.16,16.18,30.03,68.7,29.91,121.23,29.87,-101.27,29.82,36.24,29.7,88.77,29.62,3.78,29.54,-81.2,29.49,56.3,29.37,108.83,29.29,23.84,29.17,76.37,29.08,-8.62,28.96,43.91,28.84,96.43,28.76,11.44,28.63,63.97,28.51,116.49,28.47,-106.0,28.43,31.51,28.31,84.03,28.23,-0.95,28.1,51.57,27.98,104.09,27.9,19.11,27.78,71.63,27.62,-98.34,27.58,39.17,27.46,91.69,27.38,6.71,27.26,59.23,27.13,111.75,27.05,26.77,26.93,79.29,26.85,-5.69,26.73,46.83,26.61,99.36,26.53,14.37,26.41,66.89,26.29,119.42,26.25,-103.07,26.09,86.96,26.01,1.97,25.77,107.02,25.69,22.03,25.58,74.56,25.5,-10.43,25.38,42.1,25.26,94.62,25.18,9.64,24.94,114.68,24.9,-107.81,24.86,29.7,24.74,82.22,24.67,-2.76,24.55,49.76,24.43,102.28,24.35,17.3,24.23,69.82,24.15,-15.16,24.08,-100.15,23.92,89.88,23.84,4.9,23.72,57.42,23.61,109.95,23.53,24.96,23.41,77.48,23.33,-7.5,23.22,45.02,23.1,97.55,23.02,12.56,22.75,-104.88,22.71,32.62,22.59,85.15,22.52,0.16,22.4,52.69,22.28,105.21,22.21,20.23,22.09,72.75,22.01,-12.24,21.9,40.29,21.78,92.81,21.7,7.83,21.63,-77.16,21.4,27.89,21.28,80.41,21.2,-4.57,21.13,-89.56,21.09,47.95,20.97,100.47,20.9,15.49,20.63,-101.96,20.59,35.55,20.4,3.09,20.28,55.61,20.09,23.15,19.98,75.68,19.9,-9.31,19.79,43.21,19.67,95.74,19.6,10.75,19.29,30.82,19.18,83.34,19.1,-1.65,18.99,50.88,18.88,103.4,18.8,18.42,18.61,-14.04,18.54,-99.03,18.31,6.02,18.01,26.08,17.9,78.6,17.82,-6.38,17.75,-91.37,17.71,46.14,17.59,98.66,17.52,13.68,17.22,33.74,17.03,1.28,16.92,53.8,16.81,106.33,16.73,21.34,16.62,73.87,16.55,-11.12,16.47,-96.1,16.25,8.94,15.95,29.01,15.76,-3.45,15.69,-88.44,15.65,49.07,15.54,101.59,15.46,16.61,15.28,-15.85,15.17,36.67,14.98,4.21,14.69,24.27,14.57,76.79,14.5,-8.19,14.39,44.33,14.2,11.87,13.91,31.93,13.72,-0.53,13.65,-85.51,13.5,104.52,13.43,19.53,13.25,-12.93,13.14,39.6,12.95,7.14,12.66,27.2,12.55,79.72,12.47,-5.26,12.25,99.78,12.18,14.8,11.89,34.86,11.71,2.4,11.49,107.45,11.41,22.46,11.23,-10.0,11.12,42.52,10.94,10.06,10.87,-74.92,10.65,30.12,10.46,-2.34,10.35,50.19,10.17,17.73,10.1,-67.26,9.95,122.77,9.88,37.79,9.7,5.33,9.41,25.39,9.3,77.91,9.23,-7.07,9.12,45.45,8.94,12.99,8.87,-72.0,8.65,33.05,8.47,0.59,8.18,20.65,8.1,-64.33,8.0,-11.81,7.96,125.7,7.89,40.71,7.71,8.25,7.63,-76.73,7.42,28.32,7.31,80.84,7.24,-4.15,7.13,48.38,6.95,15.92,6.88,-69.07,6.66,35.98,6.48,3.52,6.19,23.58,6.12,-61.41,6.01,-8.88,5.9,43.64,5.72,11.18,5.65,-73.8,5.51,116.23,5.44,31.24,5.36,-53.74,5.26,-1.22,4.97,18.84,4.9,-66.14,4.68,38.91,4.5,6.44,4.21,26.51,4.14,-58.48,3.93,46.57,3.75,14.11,3.67,-70.88,3.46,34.17,2.99,21.77,2.92,-63.21,2.71,41.83,2.45,-75.61,2.31,114.42,2.24,29.43,2.17,-55.55,1.77,17.03,1.7,-67.95,1.49,37.1,1.09,109.68,1.02,24.7,0.95,-60.29,0.56,12.3,0.48,-72.69,0.34,117.34,0.27,32.36,0.2,-52.62,-0.2,19.96,-0.27,-65.02,-0.48,40.02,-0.73,-77.42,-0.88,112.61,-0.95,27.62,-1.02,-57.36,-1.16,132.67,-1.42,15.23,-1.49,-69.76,-1.63,120.27,-1.7,35.29,-1.77,-49.7,-2.17,22.89,-2.24,-62.1,-2.63,10.49,-2.71,-74.5,-2.85,115.54,-2.92,30.55,-2.99,-54.43,-3.32,103.14,-3.39,18.15,-3.46,-66.83,-3.67,38.21,-3.75,-46.77,-3.89,143.26,-3.93,-79.23,-4.14,25.82,-4.21,-59.17,-4.5,-39.11,-4.61,13.42,-4.68,-71.57,-4.9,33.48,-4.97,-51.51,-5.11,138.52,-5.36,21.08,-5.44,-63.91,-5.72,-43.84,-5.87,146.19,-5.9,-76.3,-6.12,28.74,-6.19,-56.24,-6.48,-36.18,-6.59,16.34,-6.66,-68.64,-6.88,36.41,-6.95,-48.58,-7.09,141.45,-7.27,108.99,-7.35,24.01,-7.42,-60.98,-7.71,-40.92,-7.89,-73.38,-8.1,31.67,-8.18,-53.32,-8.58,19.27,-8.65,-65.71,-8.87,39.33,-8.94,-45.65,-9.12,-78.11,-9.34,26.93,-9.41,-58.05,-9.7,-37.99,-9.81,14.53,-9.88,-70.45,-10.1,34.6,-10.17,-50.39,-10.57,22.2,-10.65,-62.79,-10.94,-42.73,-11.12,-75.19,-11.34,29.86,-11.41,-55.12,-11.81,17.46,-11.89,-67.52,-12.11,37.52,-12.18,-47.46,-12.33,142.57,-12.58,25.12,-12.66,-59.86,-12.95,-39.8,-13.14,-72.26,-13.36,32.79,-13.43,-52.2,-13.84,20.39,-13.91,-64.6,-14.13,40.45,-14.2,-44.53,-14.61,28.05,-14.69,-56.93,-14.83,133.1,-14.91,48.11,-15.09,15.65,-15.17,-69.33,-15.39,35.71,-15.46,-49.27,-15.87,23.32,-15.95,-61.67,-16.1,128.36,-16.25,-41.61,-16.66,30.98,-16.73,-54.01,-16.88,136.02,-17.14,18.58,-17.22,-66.41,-17.37,123.63,-17.52,-46.34,-17.67,143.69,-17.93,26.24,-18.01,-58.74,-18.16,131.29,-18.23,46.3,-18.42,13.84,-18.73,33.91,-18.8,-51.08,-18.95,138.95,-19.22,21.51,-19.29,-63.48,-19.45,126.55,-19.6,-43.42,-19.75,146.62,-20.02,29.17,-20.09,-55.82,-20.25,134.22,-20.51,16.77,-20.59,-68.21,-20.74,121.82,-20.9,-48.15,-21.05,141.88,-21.32,24.43,-21.4,-60.55,-21.55,129.48,-21.63,44.5,-22.05,117.08,-22.13,32.1,-22.21,-52.89,-22.36,137.14,-22.63,19.7,-22.71,-65.29,-22.86,124.74,-23.02,-45.22,-23.18,144.81,-23.45,27.36,-23.53,-57.62,-23.68,132.41,-23.76,47.42,-23.96,14.96,-24.04,-70.02,-24.19,120.01,-24.27,35.02,-24.35,-49.96,-24.51,140.07,-24.78,22.62,-24.86,-62.36,-25.02,127.67,-25.34,147.73,-25.54,115.27,-25.62,30.29,-25.69,-54.7,-25.85,135.33,-26.13,17.89,-26.21,-67.1,-26.37,122.93,-26.69,143.0,-26.97,25.55,-27.05,-59.43,-27.21,130.6,-27.54,150.66,-27.74,118.2,-27.9,-51.77,-28.06,138.26,-28.35,20.82,-28.43,-64.17,-28.59,125.86,-28.92,145.92,-29.21,28.48,-29.29,-56.51,-29.45,133.53,-29.82,-68.91,-29.99,121.13,-30.32,141.19,-30.61,23.74,-30.7,-61.24,-30.86,128.79,-31.2,148.85,-31.41,116.39,-31.57,-53.58,-31.74,136.45,-32.04,19.01,-32.12,-65.98,-32.29,124.05,-32.63,144.12,-32.93,26.67,-33.01,-58.32,-33.57,-70.71,-33.74,119.32,-34.09,139.38,-34.48,-63.05,-35.0,147.04,-35.97,-67.79,-36.5,142.31,-36.91,-60.12,-37.49,-72.52,-38.44,-64.86,-38.77,177.69,-40.02,-69.6,-41.58,148.16,-42.64,-66.67,-44.32,-71.41,-44.67,171.15,-47.14,-68.48,-48.96,-73.21,-52.06,-70.29,-67.01,143.85,-67.48,111.39,-68.24,131.45,-68.43,46.47,-68.73,98.99,-69.02,151.51,-69.12,-70.98,-69.22,66.53,-69.53,119.05,-69.74,34.07,-70.05,86.59,-70.37,139.12,-70.58,54.13,-70.91,106.65,-71.13,21.67,-71.24,159.18,-71.35,-63.31,-71.46,74.19,-71.69,-10.79,-71.8,126.72,-72.03,41.73,-72.38,94.25,-72.62,9.27,-72.74,146.78,-72.99,61.79,-73.36,114.32,-73.61,29.33,-73.74,166.84,-74.0,81.86,-74.26,-3.13,-74.39,134.38,-74.52,-88.11,-74.66,49.39,-75.07,101.92,-75.21,-120.57,-75.35,16.93,-75.49,154.44,-75.64,-68.05,-75.78,69.46,-76.08,-15.53,-76.23,121.98,-76.38,-100.51,-76.53,37.0,-77.0,89.52,-77.16,-132.97,-77.32,4.53,-77.49,142.04,-77.65,-80.45,-77.82,57.06,-78.17,-27.93,-78.34,109.58,-78.52,-112.91,-78.7,24.6,-78.89,162.1,-79.26,77.12,-79.46,-145.37,-79.66,-7.86,-79.86,129.64,-80.06,-92.85,-80.27,44.66,-80.93,97.18,-81.16,-125.31,-81.4,12.2,-81.64,149.71,-81.89,-72.79,-82.15,64.72,-82.69,-20.26,-82.98,117.24,-83.28,-105.25,-83.59,32.26,-83.92,169.77,-84.27,-52.72,-84.64,84.78,-85.04,-137.71,-85.47,-0.2,-85.95,137.31,-86.49,-85.19,-87.13,52.32,-87.97,-170.17,-90.0,-0.0];
 
-  // Маркеры городов — совпадают с координатами CITIES.tomsk / CITIES.novosibirsk
+  // Маркеры городов — совпадают с координатами офисов в данных городов (src/_data/cities)
   var MARKERS = [
     { key: 'tomsk',       lat: 56.4587, lon: 84.9563, size: 1.1 },
     { key: 'novosibirsk', lat: 55.0418, lon: 82.9301, size: 1.1 },
@@ -3264,17 +3246,6 @@ function toggleTech(btn) {
     }
   }
   revealBtn.addEventListener('click', revealMap);
-
-  // --- API для applyCity(): обновление активного города без перезагрузки карты ---
-  window.setOfficeGlobeCity = function (cityKey) {
-    if (!MARKERS.some(function (m) { return m.key === cityKey; })) return;
-    activeCityKey = cityKey;
-    mapWrap.dataset.cityKey = cityKey;
-    var captionEl = document.getElementById('mapRevealCity');
-    if (captionEl && typeof CITIES !== 'undefined' && CITIES[cityKey]) {
-      captionEl.textContent = 'Офис — ' + CITIES[cityKey].eyebrow;
-    }
-  };
 })();
 function openVideo(id) {
   if (!/^[a-zA-Z0-9_-]{6,20}$/.test(id)) return;
@@ -3466,7 +3437,7 @@ function openVideo(id) {
       start_when:  ans.when   || ''
     }, function () {
       showQuizPanel(false);
-    });
+    }, 'lead_quiz');
   });
   document.getElementById('quiz-modal').addEventListener('click', function (e) {
     if (e.target === this) closeQuizModal();
@@ -3476,7 +3447,7 @@ function openVideo(id) {
 <script>
 let typeTimer = null;
 function typeHeroTitle(redText, whiteText) {
-  const titleEl  = document.querySelector('[data-city-hero-title]');
+  const titleEl  = document.querySelector('[data-hero-title]');
   const badges   = document.getElementById('heroBadges');
   const ctas     = document.getElementById('heroCtas');
   if (!titleEl) return;
@@ -3540,322 +3511,11 @@ function typeHeroTitle(redText, whiteText) {
     }
   }, SPEED);
 }
-const CITIES = {
-  tomsk: {
-    name:       'Томск',
-    nameRod:    'Томске',          
-    phone:      '8 (3822) 97-99-49',
-    phoneHref:  'tel:+73822979949',
-    address:    'Томск, Кулёва 24, 4 этаж, офис 402',
-    email:      'sales@azbuka-remonta.tomsk.ru',
-    mapAlt:     'Карта — офис Азбуки Ремонта в Томске',
-    mapSrc:     'https://yandex.ru/map-widget/v1/?ll=84.956326%2C56.458676&z=17&pt=84.956326%2C56.458676%2Cpm2rdm&l=map',
-    eyebrow:    'Томск',
-    heroLine2:  'ремонт в Томске',
-    heroBg:     'images/hero-bg-tmsk.webp',
-    heroBgMobile: 'images/hero-bg-tmsk-mobile.webp',
-    footerText: 'Ремонт квартир в Томске с 2010 года',
-    schemaCity: 'Томск',
-    schemaPhone:'+73822979949',
-    schemaAddr: 'Кулёва 24, 4 этаж, офис 402',
-    schemaUrl:  'https://azbuka-remonta.ru/',
-    ogTitle:      'Азбука Ремонта — Профессиональный ремонт квартир в Томске',
-    ogDesc:       'Ремонт квартир под ключ в Томске. Бесплатная смета, гарантия 24 месяца, более 600 объектов.',
-    ogImage:      'https://azbuka-remonta.ru/images/hero-bg-tmsk.webp',
-    metaKeywords: 'ремонт квартир Томск, ремонт под ключ Томск, отделка квартир Томск, дизайн проект Томск, капитальный ремонт Томск, Азбука ремонта',
-    saleTitle:    'Скидка 50% на дизайн‑проект',
-    salePrice:    '450 ₽/м²',
-    salePriceOld: '900 ₽/м²',
-    proof: [
-      ['«всё отлично, в срок, всё прозрачно и понятно»', 'Евгения Сурова'],
-      ['«Квартиру сдали в срок, даже на пару недель раньше»', 'Валя Рогова'],
-      ['«за постоянные фото и видео с ремонта»', 'Сергей Б.'],
-      ['«на каждом этапе на связи менеджер и прораб»', 'Anton Umarov'],
-    ],
-    reviewsFile:  'reviews.json',
-    reviewsTotal: 19,
-    reviewsAvg:   4.9,
-    reviewsUrl:   'https://2gis.ru/tomsk/geo/70000001027049308',
-    geoNames:   ['Tomsk', 'Томск'],
-  },
-  novosibirsk: {
-    name:       'Новосибирск',
-    nameRod:    'Новосибирске',
-    phone:      '8 (923) 141-01-54',
-    phoneHref:  'tel:+79231410154',
-    address:    'Новосибирск, ул. Семьи Шамшиных, 64, офис 412, 4 этаж',
-    email:      'dir@azbuka-remonta-nsk.ru',
-    mapAlt:     'Карта — офис Азбуки Ремонта в Новосибирске',
-    mapSrc:     'https://yandex.ru/map-widget/v1/?ll=82.930069%2C55.041839&z=17&pt=82.930069%2C55.041839%2Cpm2rdm&l=map',
-    eyebrow:    'Новосибирск',
-    heroLine2:  'ремонт в Новосибирске',
-    heroBg:     'images/hero-bg-nsk.webp',
-    heroBgMobile: 'images/hero-bg-nsk-mobile.webp',
-    footerText: 'Ремонт квартир в Новосибирске с 2010 года',
-    schemaCity: 'Новосибирск',
-    schemaPhone:'+79231410154',
-    schemaAddr: 'ул. Семьи Шамшиных, 64, офис 412, 4 этаж',
-    schemaUrl:  'https://azbuka-remonta.ru/',
-    ogTitle:      'Азбука Ремонта — Профессиональный ремонт квартир в Новосибирске',
-    ogDesc:       'Ремонт квартир под ключ в Новосибирске. Бесплатная смета, гарантия 24 месяца, более 600 объектов.',
-    ogImage:      'https://azbuka-remonta.ru/images/hero-bg-nsk.webp',
-    metaKeywords: 'ремонт квартир Новосибирск, ремонт под ключ Новосибирск, отделка квартир Новосибирск, дизайн проект Новосибирск, капитальный ремонт Новосибирск, Азбука ремонта',
-    saleTitle:    'Скидка 50% на дизайн‑проект',
-    salePrice:    '750 ₽/м²',
-    salePriceOld: '1 500 ₽/м²',
-    proof: [
-      ['«в сроки уложились, смета не поплыла»', 'Евгения Юрчак'],
-      ['«ремонт сделали ровно в обещанные сроки»', 'Наталья Решетова'],
-      ['«нам показали реальные реализованные объекты, а не просто картинки»', 'Nikita Iron'],
-      ['«всем, кто ищет комплексный подход»', 'Мария Рубшева'],
-    ],
-    reviewsFile:  'reviews-nsk.json',
-    reviewsTotal: 27,
-    reviewsAvg:   4.9,
-    reviewsUrl:   'https://2gis.ru/novosibirsk/geo/70000001095616225',
-    geoNames:   ['Novosibirsk', 'Новосибирск', 'Новосибирский'],
-  }
-};
-const DEFAULT_CITY = 'tomsk'; // ВНИМАНИЕ: должно совпадать с DEFAULT_CITY в inline hero-preload <script> в <head>
-/* Город для заявки. Берётся отсюда, а не из localStorage: если определение
-   по IP не сработало, в хранилище пусто, а на экране при этом Томск.
-   ipCity — что вернул сервис определения, как есть, даже если это чужой
-   город: менеджеру полезно видеть расхождение. */
-window.CITIES  = CITIES;
-window.AZ_CITY = { key: DEFAULT_CITY, name: CITIES[DEFAULT_CITY].name,
-                   ipCity: '', ipMatched: null, source: 'Не определился' };
-const STORAGE_KEY  = 'azbuka_city';
-const SOURCE_KEY   = 'azbuka_city_source'; // 'ip' | 'manual' — откуда взят сохранённый город
-function applyCity(cityKey, animate) {
-  const c = CITIES[cityKey];
-  if (!c) return;
-  window.AZ_CITY.key  = cityKey;
-  window.AZ_CITY.name = c.name;
-  document.querySelectorAll('[data-city-phone]').forEach(el => {
-    el.textContent = c.phone;
-    el.href = c.phoneHref;
-  });
-  const floatBtn = document.getElementById('floatPhoneBtn');
-  if (floatBtn) floatBtn.href = c.phoneHref;
-  const eyebrow = document.querySelector('[data-city-eyebrow]');
-  if (eyebrow) eyebrow.textContent = c.eyebrow;
-  const heroTitle = document.querySelector('[data-city-hero-title]');
-  if (heroTitle) {
-    if (animate) {
-      typeHeroTitle('Профессиональный', c.heroLine2);
-    } else {
-      if (typeTimer) { clearInterval(typeTimer); typeTimer = null; }
-      const _sp = c.heroLine2.indexOf(' ');
-      const _w1 = _sp === -1 ? c.heroLine2 : c.heroLine2.slice(0, _sp);
-      const _r1 = _sp === -1 ? '' : c.heroLine2.slice(_sp);
-      heroTitle.innerHTML =
-        '<em>Профессиональный</em>' +
-        '<span class="white-line">' +
-          '<span class="word-white">' + _w1 + '</span>' +
-          '<span class="rest-red">' + _r1 + '</span>' +
-        '</span>';
-    }
-  }
-  const heroBg = document.querySelector('.hero-bg-img');
-  if (heroBg && c.heroBg) {
-    var isMobileHero = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-    var heroBgSrc = (isMobileHero && c.heroBgMobile) ? c.heroBgMobile : c.heroBg;
-    heroBg.style.backgroundImage = "url('" + heroBgSrc + "')";
-  }
-  const addr = document.querySelector('[data-city-address]');
-  if (addr) addr.textContent = c.address;
-  const emailEl = document.querySelector('[data-city-email]');
-  if (emailEl) { emailEl.textContent = c.email; emailEl.href = 'mailto:' + c.email; }
-  const mapWrap = document.getElementById('contactsMap');
-  if (mapWrap && c.mapSrc) {
-    mapWrap.dataset.mapSrc = c.mapSrc;
-    mapWrap.dataset.mapAlt = c.mapAlt;
-    const mapIframe = mapWrap.querySelector('iframe');
-    if (mapIframe) {
-      mapIframe.src = c.mapSrc;
-      mapIframe.title = c.mapAlt;
-    }
-    if (typeof window.setOfficeGlobeCity === 'function') {
-      window.setOfficeGlobeCity(cityKey);
-    }
-  }
-  const footerTxt = document.querySelector('[data-city-footer-text]');
-  if (footerTxt) footerTxt.textContent = c.footerText;
-  const saleTitle = document.getElementById('sale-title');
-  if (saleTitle) saleTitle.textContent = c.saleTitle;
-  document.querySelectorAll('[data-city-proof]').forEach(el => {
-    el.textContent = c.proof[+el.dataset.cityProof][0];
-  });
-  document.querySelectorAll('[data-city-proof-author]').forEach(el => {
-    el.textContent = c.proof[+el.dataset.cityProofAuthor][1];
-  });
-  const salePrice = document.querySelector('[data-sale-price]');
-  if (salePrice) salePrice.textContent = c.salePrice;
-  const salePriceOld = document.querySelector('[data-sale-price-old]');
-  if (salePriceOld) salePriceOld.textContent = c.salePriceOld;
-  document.querySelectorAll('.city-tab').forEach(t => {
-    const isActive = t.id === 'tab-' + cityKey;
-    t.classList.toggle('active', isActive);
-    t.setAttribute('aria-selected', isActive ? 'true' : 'false');
-  });
-  const metaDesc = document.querySelector('meta[name="description"]');
-  if (metaDesc) {
-    metaDesc.content = 'Профессиональный ремонт квартир и домов в ' +
-      c.nameRod + '. Бесплатная смета за 24 часа. Гарантия 24 месяца. Более 600 объектов.';
-  }
-  document.title = 'Ремонт квартир в ' + c.nameRod + ' под ключ | Азбука Ремонта';
-  const ogSelectors = {
-    'og:title':            c.ogTitle,
-    'og:description':      c.ogDesc,
-    'og:image':            c.ogImage,
-    'twitter:title':       c.ogTitle,
-    'twitter:description': c.ogDesc,
-    'twitter:image':       c.ogImage,
-  };
-  for (const [prop, val] of Object.entries(ogSelectors)) {
-    const el = document.querySelector(`meta[property="${prop}"], meta[name="${prop}"]`);
-    if (el) el.setAttribute('content', val);
-  }
-  const metaKW = document.querySelector('meta[name="keywords"]');
-  if (metaKW && c.metaKeywords) metaKW.setAttribute('content', c.metaKeywords);
-  const schema = document.getElementById('schemaOrg');
-  if (schema) {
-    schema.textContent = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": ["LocalBusiness", "HomeAndConstructionBusiness"],
-      "name": "Азбука Ремонта",
-      "description": "Профессиональный ремонт квартир и домов в " + c.nameRod,
-      "url": c.schemaUrl,
-      "telephone": c.schemaPhone,
-      "email": c.email,
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": c.schemaCity,
-        "streetAddress": c.schemaAddr,
-        "addressCountry": "RU"
-      },
-      "openingHours": "Mo-Fr 09:00-18:00",
-      "foundingDate": "2010",
-      "sameAs": ["https://vk.com/azbukaremonta"]
-    }, null, 2);
-  }
-  if (animate) {
-    document.querySelectorAll('[data-city-phone],[data-city-address],[data-city-footer-text],[data-city-eyebrow]')
-      .forEach(el => {
-        el.style.transition = 'color .3s';
-        el.style.color = '#E8201A';
-        setTimeout(() => { el.style.color = ''; }, 800);
-      });
-  }
-  if (typeof window.reloadReviews === 'function') window.reloadReviews(c);
-}
-function showCityBar() {
-  document.body.classList.add('city-bar-visible');
-  const bar = document.getElementById('cityBar');
-  if (bar) bar.classList.remove('hidden');
-}
-function hideCityBar() {
-  document.body.classList.remove('city-bar-visible');
-  const bar = document.getElementById('cityBar');
-  if (bar) bar.classList.add('hidden');
-}
-function switchCity(cityKey) {
-  if (!CITIES[cityKey]) return;
-  localStorage.setItem(STORAGE_KEY, cityKey);
-  localStorage.setItem(SOURCE_KEY, 'manual');
-  window.AZ_CITY.source = 'Выбрал вручную';
-  showCityBar();
-  applyCity(cityKey, true);
-  const c = CITIES[cityKey];
-  showToast('📍 Показываем контент для города ' + c.name);
-}
-function showToast(msg) {
-  const t = document.getElementById('cityToast');
-  if (!t) return;
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
-}
-async function detectCityByIP() {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 4000);
-  try {
-    const r = await fetch('https://ipapi.co/json/', { signal: controller.signal });
-    clearTimeout(timer);
-    if (!r.ok) return null;
-    const d = await r.json();
-    window.AZ_CITY.ipCity = (d.city || d.region || '').toString().slice(0, 100);
-    const cityStr = (d.city || d.region || '').toLowerCase();
-    for (const [key, cfg] of Object.entries(CITIES)) {
-      if (cfg.geoNames.some(n => cityStr.includes(n.toLowerCase()))) {
-        window.AZ_CITY.ipMatched = true;
-        return key;
-      }
-    }
-    // Сервис ответил, но это не Томск и не Новосибирск: на странице
-    // останется дефолтный Томск, а в CRM такая заявка не должна уехать
-    // томской — см. cityPayload().
-    window.AZ_CITY.ipMatched = false;
-    return null;
-  } catch {
-    clearTimeout(timer);
-    return null;
-  }
-}
-function onCityAutoDetected() {
-}
-(async function initCity() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved && CITIES[saved]) {
-    if (localStorage.getItem(SOURCE_KEY) === 'ip') {
-      window.AZ_CITY.source = 'По IP';
-      hideCityBar();
-    } else {
-      window.AZ_CITY.source = 'Выбрал вручную';
-      showCityBar();
-    }
-    applyCity(saved, true);
-    return;
-  }
-  showCityBar();
-  applyCity(DEFAULT_CITY, false);
-  const autoLabel = document.getElementById('cityBarAuto');
-  if (autoLabel) autoLabel.textContent = 'Определяем город…';
-  const detected = await detectCityByIP();
-  if (detected) {
-    applyCity(detected, true);
-    window.AZ_CITY.source = 'По IP';
-    const c = CITIES[detected];
-    showToast('📍 Определён ваш город: ' + c.name + '. Показываем актуальный контент.');
-    localStorage.setItem(STORAGE_KEY, detected);
-    localStorage.setItem(SOURCE_KEY, 'ip');
-    hideCityBar();
-    onCityAutoDetected();
-  } else {
-    typeHeroTitle('Профессиональный', CITIES[DEFAULT_CITY].heroLine2);
-    if (autoLabel) autoLabel.innerHTML = 'Определите город вручную';
-    onCityAutoDetected();
-  }
-})();
-function resetCity() {
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(SOURCE_KEY);
-  showCityBar();
-  const autoLabel = document.getElementById('cityBarAuto');
-  if (autoLabel) autoLabel.textContent = 'Определяем город…';
-  applyCity(DEFAULT_CITY, false);
-  detectCityByIP().then(detected => {
-    if (detected) {
-      applyCity(detected, true);
-      localStorage.setItem(STORAGE_KEY, detected);
-      localStorage.setItem(SOURCE_KEY, 'ip');
-      hideCityBar();
-    } else {
-      typeHeroTitle('Профессиональный', CITIES[DEFAULT_CITY].heroLine2);
-      if (autoLabel) autoLabel.innerHTML = 'Определите город вручную';
-    }
-  });
-}
+/* Город этого сайта. Всё остальное (телефон, адрес, цены, метатеги, фон,
+   отзывы) подставлено в разметку при сборке. Объект нужен скриптам: анимации
+   заголовка, заявкам (город и телефон для сообщения об ошибке). */
+window.AZ_CITY = {"key":"tomsk","name":"Томск","phone":"8 (3822) 97-99-49","phoneHref":"tel:+73822979949","heroLine2":"ремонт в Томске"};
+typeHeroTitle('Профессиональный', AZ_CITY.heroLine2);
 </script>
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Просмотр фото">
   <button class="lightbox-close" id="lightboxClose" aria-label="Закрыть">
@@ -4138,7 +3798,7 @@ function resetCity() {
 (function () {
   var AVATAR_COLORS = { red: 'red', blue: 'blue', green: 'green', orange: 'orange' };
   /* ═══ Данные ═══ */
-  var FALLBACK_REVIEWS_TOMSK = [
+var FALLBACK_REVIEWS = [
     {
       id: 1, author: "Вера К.", initials: "ВК", color: "blue",
       date: "2025", rating: 5, source: "2ГИС",
@@ -4190,43 +3850,8 @@ function resetCity() {
       text: "Черновые работы выполнены хорошо. Регулярно присылали видео-отчёты. Работники не торопятся сделать быстрее, а поощряют продуманность. Однозначно рекомендую!"
     }
   ];
-  var FALLBACK_REVIEWS_NSK = [
-    {
-      id: 1, author: "Мария Рубшева", initials: "МР", color: "blue",
-      date: "июнь 2026", rating: 5, source: "2ГИС",
-      text: "Хочу рекомендовать Азбуку ремонта всем, кто ищет комплексный подход. Проект разработан чётко, без воды, с отличными схемами расстановки мебели и развёртками стен. Ребята учли даже расположение розеток для будущей техники. Результат — стильно, современно и жизнеспособно."
-    },
-    {
-      id: 2, author: "Гоша Клименко", initials: "ГК", color: "green",
-      date: "17 июня 2026", rating: 5, source: "2ГИС",
-      text: "Долго выбирали, кому доверить проект — не прогадали с Азбукой ремонта. Дизайн получился не просто красивым, а суперфункциональным. Учли все наши хотелки: скрытые системы хранения, сценарии освещения до мелочей, разумное зонирование. Лучший дизайн-проект из возможных!"
-    },
-    {
-      id: 3, author: "Никита Евдокимов", initials: "НЕ", color: "orange",
-      date: "14 июня 2026", rating: 5, source: "2ГИС",
-      text: "Разработали такой дизайн-проект, что мы влюбились с первого рендера. Попали идеально в наш стиль: хотели современный уют без пафоса — получили продуманное пространство мечты. Особый респект за цветовые решения и необычную геометрию потолка."
-    },
-    {
-      id: 4, author: "Nikita Iron", initials: "NI", color: "red",
-      date: "25 марта 2026", rating: 5, source: "2ГИС",
-      text: "Дизайнер предложила три варианта планировки, учла пожелания по зонированию и цветовой гамме. Визуализация была настолько точной, что итоговый ремонт совпал с ней на 95%. Все дополнительные работы согласовывали заранее по фото — без неожиданных сумм в конце. По срокам справились даже раньше!"
-    },
-    {
-      id: 5, author: "Наталья Решетова", initials: "НР", color: "blue",
-      date: "10 марта 2026", rating: 5, source: "2ГИС",
-      text: "Чёткое соблюдение сроков, высокое качество работ, идеальная чистота после себя и прозрачная смета — никаких неожиданных расходов. Прораб Алексей лично контролировал каждый этап. Рекомендую как надёжного и честного подрядчика. Если будет второй ремонт — только к ним!"
-    },
-    {
-      id: 6, author: "Илья Фомин", initials: "ИФ", color: "green",
-      date: "9 февраля 2026", rating: 5, source: "2ГИС",
-      text: "Выбирал из трёх компаний — выбор пал на Азбуку ремонта. Прораб на замерах дал подробную консультацию, не было ощущения навязывания. Смета расписана по этапам. Электрика сделана идеально — провод к проводу, всё ровненько. Спасибо, что помогли разобраться!"
-    }
-  ];
-  var REVIEWS_CONFIG = {
-    tomsk:       { total: 19, avg: 4.9, url: 'https://2gis.ru/tomsk/firm/70000001027049308/tab/reviews' },
-    novosibirsk: { total: 27, avg: 5.0, url: 'https://2gis.ru/novosibirsk/geo/70000001095616225' }
-  };
-  /* ═══ Состояние стека ═══ */
+  var REVIEWS_FALLBACK_CONFIG = { total: 19, avg: 4.9, url: 'https://2gis.ru/tomsk/firm/70000001027049308/tab/reviews' };
+/* ═══ Состояние стека ═══ */
   var currentIndex       = 0;
   var totalCards         = 0;
   var cardEls            = [];
@@ -4471,20 +4096,13 @@ function resetCity() {
       .then(function (r) { return r.json(); })
       .then(afterLoad)
       .catch(function () {
-        var city     = localStorage.getItem('azbuka_city') || 'tomsk';
-        var cfg      = REVIEWS_CONFIG[city] || REVIEWS_CONFIG.tomsk;
-        var fallback = city === 'novosibirsk' ? FALLBACK_REVIEWS_NSK : FALLBACK_REVIEWS_TOMSK;
-        renderMeta(cfg.total, cfg.avg);
-        if (linkEl) linkEl.href = cfg.url;
-        afterLoad(fallback);
+        renderMeta(REVIEWS_FALLBACK_CONFIG.total, REVIEWS_FALLBACK_CONFIG.avg);
+        if (linkEl) linkEl.href = REVIEWS_FALLBACK_CONFIG.url;
+        afterLoad(FALLBACK_REVIEWS);
       });
   }
-  window.reloadReviews = loadReviews;
-  var savedCity  = localStorage.getItem('azbuka_city');
-  var initialCfg = (savedCity && typeof CITIES !== 'undefined' && CITIES[savedCity])
-    ? CITIES[savedCity]
-    : CITIES['tomsk'];
-  loadReviews(initialCfg);
+  /* Настройки отзывов своего города (файл, число, рейтинг, ссылка на 2ГИС) — из данных города */
+  loadReviews({"reviewsFile":"reviews.json","reviewsTotal":19,"reviewsAvg":4.9,"reviewsUrl":"https://2gis.ru/tomsk/geo/70000001027049308"});
 })();
 </script>
 <div class="cookie-banner cookie-banner--hidden" id="cookieBanner" role="alert" aria-live="polite">
